@@ -4,7 +4,7 @@ import requests as r
 
 from bs4 import BeautifulSoup
 from dataclasses import asdict
-import parsers
+from . import parsers
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE = os.path.join(BASE_DIR, 'data/jobs.json')
@@ -62,4 +62,4 @@ def run_all_scrapers():
     return all_jobs
 
 if __name__ == "__main__":
-    run_all_scrapers()
+    jobs = run_all_scrapers()
