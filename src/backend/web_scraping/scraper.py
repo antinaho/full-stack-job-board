@@ -1,9 +1,9 @@
 import os
 import json
 import requests as r
-
 from bs4 import BeautifulSoup
-from . import parsers
+from src.backend.web_scraping.parser import parsers
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE = os.path.join(BASE_DIR, 'data/jobs.json')
@@ -20,13 +20,11 @@ def scrape_html(site):
     response = r.get(site["url"])
     soup = BeautifulSoup(response.text, "lxml")
 
-    job_elements = soup.select(site["job_selector"])
+    job_elements = soup.select(site["single_job_selector"])
     
     normalized_name = site["name"].lower().replace(" ", "_")
-    module = parsers.__dict__
     func_name = f"parse_{normalized_name}"
-
-    parser_func = module.get(func_name)
+    parser_func = parsers.get(func_name)
     
     if not parser_func or not callable(parser_func):
         raise ValueError(f"No parser function found for site: {site["name"]}, expected function: {func_name}")
@@ -38,6 +36,7 @@ def scrape_html(site):
         jobs.append(job)
     
     return jobs
+
 
 def run_all_scrapers():
     sites = load_config()
@@ -52,12 +51,9 @@ def run_all_scrapers():
             ...
 
         all_jobs.extend(jobs)
-    
-    # os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-    # with open(DATA_FILE, "w") as f:
-    #     json.dump(all_jobs, f, indent = 4)
 
     return all_jobs
+
 
 if __name__ == "__main__":
     jobs = run_all_scrapers()

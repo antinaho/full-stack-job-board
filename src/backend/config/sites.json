@@ -3,7 +3,7 @@
         "name" : "Kesko",
         "url" : "https://www.kesko.fi/tyopaikat/avoimet-tyopaikat/",
         "scraper_type" : "html",
-        "job_selector" : "div.k-regular.wall-wrapper > div.row"
+        "single_job_selector" : "div.k-regular.wall-wrapper > div.row"
        
     }
 
