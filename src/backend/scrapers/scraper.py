@@ -3,7 +3,6 @@ import json
 import requests as r
 
 from bs4 import BeautifulSoup
-from dataclasses import asdict
 from . import parsers
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -33,11 +32,10 @@ def scrape_html(site):
         raise ValueError(f"No parser function found for site: {site["name"]}, expected function: {func_name}")
 
     jobs = []
-    for job in job_elements:
+    for job_element in job_elements:
         
-        job = parser_func(site["name"] ,job)
-
-        jobs.append(asdict(job))
+        job = parser_func(site["name"], job_element)
+        jobs.append(job)
     
     return jobs
 
@@ -55,9 +53,9 @@ def run_all_scrapers():
 
         all_jobs.extend(jobs)
     
-    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-    with open(DATA_FILE, "w") as f:
-        json.dump(all_jobs, f, indent = 4)
+    # os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
+    # with open(DATA_FILE, "w") as f:
+    #     json.dump(all_jobs, f, indent = 4)
 
     return all_jobs
 
