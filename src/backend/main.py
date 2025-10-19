@@ -1,16 +1,12 @@
 from src.backend.web_scraping.scraper import run_all_scrapers
-from src.backend.database.manager import insert_jobs
+from src.backend.database.manager import insert_jobs, get_jobs_from_date
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from datetime import datetime
+import pytz
 from contextlib import asynccontextmanager
 
 api = FastAPI()
-
-@asynccontextmanager
-async def lifespan():
-    jobs = run_all_scrapers()
-    insert_jobs(jobs)
 
 api.add_middleware(
     CORSMiddleware,
@@ -20,13 +16,16 @@ api.add_middleware(
     allow_headers = ["*"],
 )
 
-# @api.get("/")
-# def index():
-#     return { "message" : "Hello" }
+@api.get("/")
+def index():
+    today = datetime.now(pytz.timezone('Europe/Helsinki')).date()
+    return get_jobs_from_date(today)
 
 
-if __name__ == "__main__":
+def daily_pipeline():
     jobs = run_all_scrapers()
     insert_jobs(jobs)
-    # transform_jobs()
+
+if __name__ == "__main__":
+    pass
     

@@ -1,6 +1,7 @@
 from bs4 import element
 from datetime import datetime
 import re
+import pytz
 
 from src.backend.database.core import Job
 
@@ -38,7 +39,7 @@ def parse_kesko(company_name: str, raw_html: element.Tag) -> Job:
     return Job(
         company_name = company_name,
         job_title = str(title),
-        scrape_date = datetime.now(),
+        scrape_date = datetime.now(pytz.timezone('Europe/Helsinki')),
         html = str(raw_html),
         publish_date = publish_date,
         last_apply_date = last_apply_date,
