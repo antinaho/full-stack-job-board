@@ -387,3 +387,4 @@ frontend/.vscode/*
 .goosehints
 .job-board-venv/
 backend/data/
+*.db
