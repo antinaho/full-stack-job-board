@@ -16,7 +16,25 @@ def insert_jobs(jobs):
 def get_jobs_from_date(d):
     
     with SessionLocal() as db:
-        statement = select(Job).where((Job.scrape_date >= d) & (Job.scrape_date < d + timedelta(days=1)))
+        statement = select(Job).where((Job.date >= d) & (Job.date < d + timedelta(days=1)))
+        results = db.scalars(statement).all()
+        return results
+    
+    
+def unique_jobs_from_date(d):
+    with SessionLocal() as db:
+
+        statement = select(Job).where((Job.scrape_date >= d) & (Job.scrape_date < d + timedelta(days=1))).group_by(
+            Job.company_name,
+            Job.job_title,
+            Job.html,
+            Job.apply_url,
+            Job.publish_date,
+            Job.last_apply_date,
+            Job.salary,
+            Job.location,
+            Job.description,
+        )
         results = db.scalars(statement).all()
         return results
 

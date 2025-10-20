@@ -38,7 +38,6 @@ class Job(Base):
                 f"last_apply_date={self.last_apply_date}, salary='{self.salary}', "
                 f"location='{self.location}')")
 
-
 Base.metadata.create_all(engine)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
