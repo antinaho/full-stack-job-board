@@ -2,7 +2,7 @@ import os
 import json
 import requests as r
 from bs4 import BeautifulSoup
-from src.backend.web_scraping.parser import parsers
+from backend.web_scraping.parser import parsers
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

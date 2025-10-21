@@ -1,4 +1,4 @@
-from src.backend.database.core import SessionLocal, Job
+from backend.database.core import SessionLocal, Job
 from sqlalchemy import select
 from datetime import timedelta
 
@@ -20,7 +20,7 @@ def get_jobs_from_date(d):
         results = db.scalars(statement).all()
         return results
     
-    
+
 def unique_jobs_from_date(d):
     with SessionLocal() as db:
 

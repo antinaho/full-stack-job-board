@@ -1,0 +1,36 @@
+---
+import "../../styles/global.css"
+const page_title = "Jobs";	
+
+import JobSearch from "../../components/JobSearch.svelte";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{page_title}</title>
+  </head>
+
+  <body>
+    <main>
+	  <JobSearch client:load/>
+    </main>
+
+    <style>
+      .jobs-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      @media (min-width: 600px) {
+        .jobs-grid {
+          gap: 1.2rem;
+        }
+      }
+    </style>
+  </body>
+</html>
+

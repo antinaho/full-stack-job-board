@@ -3,7 +3,7 @@ from datetime import datetime
 import re
 import pytz
 
-from src.backend.database.core import Job
+from backend.database.core import Job
 
 parsers = {}
 
