@@ -50,3 +50,38 @@ def parse_kesko(company_name: str, raw_html: element.Tag) -> Job:
     )
 
 parsers["parse_kesko"] = parse_kesko
+
+def parse_supercell(company_name: str, raw_html: element.Tag) -> Job:
+
+    try: #Job title
+        title = raw_html.select_one("div.Offers_title__y_jGJ").text
+    except Exception:
+        title = None
+
+    try: # Apply url
+        apply_url = raw_html.select_one("a").get("href")
+    except Exception:
+        apply_url = None
+
+    try: # Location
+        location = raw_html.select_one("div.Offers_location__5xwTM").contents[0]
+    except Exception:
+        location = None
+
+    if location == None or str(location) != "Helsinki":
+        return None
+ 
+    return Job(
+        company_name = company_name,
+        job_title = str(title),
+        scrape_date = datetime.now(pytz.timezone('Europe/Helsinki')),
+        html = str(raw_html),
+        publish_date = None,
+        last_apply_date = None,
+        apply_url = str(apply_url),
+        salary = None,
+        location = str(location),
+        description = None
+    )
+
+parsers["parse_supercell"] = parse_supercell

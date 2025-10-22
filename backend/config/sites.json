@@ -5,6 +5,13 @@
         "scraper_type" : "html",
         "single_job_selector" : "div.k-regular.wall-wrapper > div.row"
        
+    },
+
+    {
+        "name" : "Supercell",
+        "url": "https://supercell.com/en/careers/?location=helsinki",
+        "scraper_type" : "html",
+        "single_job_selector" : "div.Grid_rowContainer__RAVMO > ul > li"
     }
 
 

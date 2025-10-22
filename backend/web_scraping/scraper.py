@@ -33,6 +33,8 @@ def scrape_html(site):
     for job_element in job_elements:
         
         job = parser_func(site["name"], job_element)
+        if job == None:
+            continue
         jobs.append(job)
     
     return jobs
