@@ -1,3 +1,4 @@
-src/frontend/node_modules/
-src/frontend/.vscode/
-src/frontend/.astro/
+frontend/node_modules/
+frontend/.vscode/
+frontend/.astro/
+frontend/dist/
