@@ -59,7 +59,9 @@ def parse_supercell(company_name: str, raw_html: element.Tag) -> Job:
         title = None
 
     try: # Apply url
+        url_head = "https://supercell.com"
         apply_url = raw_html.select_one("a").get("href")
+        apply_url = url_head + apply_url
     except Exception:
         apply_url = None
 
