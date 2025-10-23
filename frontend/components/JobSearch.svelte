@@ -5,7 +5,7 @@
     let jobs = [];
     let query = "";
     let error = null;
-    let jobsCount = 0;  // Plain reactive vars
+    let jobsCount = 0;
     let uniqueCount = 0;
 
     onMount(async () => {
@@ -39,11 +39,9 @@
         }
     });
 
-    // Reactive counts (updates whenever 'jobs' changes)
     $: jobsCount = jobs.length;
     $: uniqueCount = new Set(jobs.map(item => item.company_name)).size;
 
-    // Filtered jobs
     $: filteredJobs = jobs.filter((job) =>
         job.job_title.toLowerCase().includes(query.toLowerCase())
     );
