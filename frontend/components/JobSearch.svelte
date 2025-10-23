@@ -10,7 +10,25 @@
 
     onMount(async () => {
         try {
-            const response = await fetch('/api/unique_jobs/');
+            // Get current date in Helsinki timezone
+            const now = new Date();
+
+            // Use Intl.DateTimeFormat to get parts adjusted to Helsinki timezone
+            const helsinkiDateParts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Europe/Helsinki',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+            }).formatToParts(now);
+
+            // Build YYYY-MM-DD string
+            const helsinkiDate = helsinkiDateParts
+                .map(part => part.value)
+                .join('')
+                .replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+
+
+            const response = await fetch(`/jobs/?date=${helsinkiDate}`);
             if (!response.ok) {
                 throw new Error(`Fetch failed with status: ${response.status}`);
             }

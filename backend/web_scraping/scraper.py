@@ -3,6 +3,7 @@ import json
 import requests as r
 from bs4 import BeautifulSoup
 from backend.web_scraping.parser import parsers
+from backend.database.core import SessionLocal
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -56,5 +57,22 @@ def run_all_scrapers():
     return all_jobs
 
 
-if __name__ == "__main__":
+def add_to_db(jobs):
+    db = SessionLocal()
+    for job in jobs:
+        try:
+            db.add(job)
+            db.commit()
+            db.refresh(job)
+        except:
+            db.rollback()
+    db.close()
+
+
+def daily_pipeline():
     jobs = run_all_scrapers()
+    add_to_db(jobs)
+
+
+if __name__ == "__main__":
+    daily_pipeline()

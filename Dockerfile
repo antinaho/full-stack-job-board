@@ -19,7 +19,7 @@ COPY backend/ ./
 
 COPY --from=frontend /frontend/dist ./static
 
-RUN echo "0 0 * * * root python /backend/main.py >> /var/log/cron.log 2>&1" > /etc/cron.d/myjob && \
+RUN echo "0 0 * * * root python /backend/web_scraping/scraper.py >> /var/log/cron.log 2>&1" > /etc/cron.d/myjob && \
     chmod 0644 /etc/cron.d/myjob
 
 RUN echo '#!/bin/bash\n\
