@@ -5,9 +5,11 @@ from datetime import datetime
 import pytz
 from backend.exceptions import JobNotFoundError
 from fastapi import HTTPException
+import logging
 
 def get_jobs(db: Session) -> list[models.JobResponse]:
     jobs = db.query(Job).all()
+    logging.info(f"Retrieved {len(jobs)} jobs")
     return jobs
 
 
@@ -15,6 +17,7 @@ def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
     try:
         queried_date = datetime.strptime(date_string, "%Y-%m-%d").date()
     except ValueError as e:
+        logging.error(f"Tried passing invalid date string {date_string}. Error: {str(e)}")
         raise HTTPException(status_code=404, detail=str(e))
     jobs = (
         db.query(Job.company_name, Job.job_title, Job.apply_url)
@@ -22,13 +25,16 @@ def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
         .distinct(Job.company_name, Job.job_title, Job.apply_url)
         .all()
     )
+    logging.info(f"Retrieved {len(jobs)} unique jobs for date {queried_date}")
     return jobs
 
 
 def get_job_by_id(db: Session, job_id: int) -> Job:
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
+        logging.error(f"Job not found with id {job_id}")
         raise JobNotFoundError(job_id)
+    logging.info(f"Retrieved job {job_id}")
     return job
 
 

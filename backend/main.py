@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.database.schemas.job import Job
 from backend.database.core import Base, engine
 from backend.api import register_routes
-
+from backend.logging import setup_logging
 
 
 
@@ -24,6 +24,8 @@ async def lifespan(app: FastAPI):
 #     global_cache['result'] = result
 #     yield
 #     global_cache['result'] = None
+
+setup_logging()
 
 app = FastAPI(lifespan=lifespan)
 

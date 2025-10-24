@@ -1,5 +1,5 @@
 from backend.database.core import Base
-from sqlalchemy import Column, String, Date, Integer
+from sqlalchemy import Column, String, Date, Integer, Uuid
 
 class Job(Base):
     __tablename__ = "jobs"
