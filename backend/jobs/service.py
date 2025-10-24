@@ -6,6 +6,8 @@ import pytz
 from backend.exceptions import JobNotFoundError
 from fastapi import HTTPException
 import logging
+from backend.jobs.caching import job_cache, clear_expired_jobs
+
 
 def get_jobs(db: Session) -> list[models.JobResponse]:
     jobs = db.query(Job).all()
@@ -14,17 +16,29 @@ def get_jobs(db: Session) -> list[models.JobResponse]:
 
 
 def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
+
     try:
         queried_date = datetime.strptime(date_string, "%Y-%m-%d").date()
     except ValueError as e:
         logging.error(f"Tried passing invalid date string {date_string}. Error: {str(e)}")
         raise HTTPException(status_code=404, detail=str(e))
+    
+    if queried_date in job_cache:
+        jobs = job_cache[queried_date]
+        logging.info(f"Retrieving jobs from cache")
+        logging.info(f"Retrieved {len(jobs)} unique jobs for date {queried_date}")
+        return jobs
+
     jobs = (
         db.query(Job.company_name, Job.job_title, Job.apply_url)
         .filter(Job.added_on == queried_date)
         .distinct(Job.company_name, Job.job_title, Job.apply_url)
         .all()
     )
+
+    job_cache[queried_date] = jobs
+    clear_expired_jobs()
+
     logging.info(f"Retrieved {len(jobs)} unique jobs for date {queried_date}")
     return jobs
 
