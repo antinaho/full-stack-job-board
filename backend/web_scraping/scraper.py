@@ -65,8 +65,8 @@ def add_to_db(jobs):
             db.add(job)
             db.commit()
             db.refresh(job)
-        except:
-            ...
+        except Exception as e:
+            logging.error(f"Daily Pipeline: Failed to add job to database. Error: {str(e)}")
     db.close()
 
 
@@ -86,8 +86,8 @@ def daily_pipeline():
     try:
         today_jobs = db.query(Job.company_name, Job.job_title, Job.apply_url).filter(Job.added_on == today_str).distinct(Job.company_name, Job.job_title, Job.apply_url).all()
         jc.job_cache = (today_str, today_jobs)
-    except:
-        ...
+    except Exception as e:
+        logging.error(f"Daily Pipeline: Failed to get jobs from database. Error: {str(e)}")
     db.close()
 
 
