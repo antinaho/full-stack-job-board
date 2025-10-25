@@ -11,7 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 import pytz
 
 from contextlib import asynccontextmanager
-global_cache = {'result': None}
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     daily_pipeline()
@@ -19,15 +19,6 @@ async def lifespan(app: FastAPI):
     yield
     scheduler.shutdown()
     
-#TODO cache the results for a given day. lifespan at the start of the server
-# from datetime import datetime
-# import pytz
-#     today = datetime.now(pytz.timezone('Europe/Helsinki')).date()
-#     result = unique_jobs_from_date(today)
-#     global_cache['result'] = result
-#     yield
-#     global_cache['result'] = None
-
 setup_logging()
 
 app = FastAPI(lifespan=lifespan)
@@ -50,3 +41,14 @@ Base.metadata.create_all(engine)
 
 register_routes(app)
 app.mount("/", StaticFiles(directory="static", html=True, check_dir=False), name="static")
+
+
+
+#TODO cache the results for a given day. lifespan at the start of the server
+# from datetime import datetime
+# import pytz
+#     today = datetime.now(pytz.timezone('Europe/Helsinki')).date()
+#     result = unique_jobs_from_date(today)
+#     global_cache['result'] = result
+#     yield
+#     global_cache['result'] = None

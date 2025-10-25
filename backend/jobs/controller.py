@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Request, HTTPException
 from backend.database.core import DbSession
 import backend.jobs.service as service
 import backend.jobs.models as models
@@ -21,6 +21,11 @@ def get_job(db: DbSession, job_id: int):
     return service.get_job_by_id(db, job_id)
 
 
-# @router.post("/", response_model=models.JobResponse, status_code=status.HTTP_201_CREATED)
-# def create_job(db: DbSession, job: models.JobCreate):
-#     return service.create_job(db, job)
+@router.post("/", response_model=models.JobResponse, status_code=status.HTTP_201_CREATED)
+def create_job(request: Request, db: DbSession, job: models.JobCreate):
+    client_host = request.client.host
+    print("Hello?")
+    print(client_host)
+    if client_host not in ("127.0.0.1", "::1"):
+        raise HTTPException(status_code=403, detail="Local access only")
+    return service.create_job(db, job)

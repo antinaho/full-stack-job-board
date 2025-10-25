@@ -4,7 +4,7 @@ import requests as r
 from bs4 import BeautifulSoup
 from backend.web_scraping.parser import parsers
 from backend.database.core import SessionLocal
-
+import logging
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -58,6 +58,7 @@ def run_all_scrapers():
 
 
 def add_to_db(jobs):
+
     db = SessionLocal()
     for job in jobs:
         try:
@@ -65,13 +66,29 @@ def add_to_db(jobs):
             db.commit()
             db.refresh(job)
         except:
-            db.rollback()
+            ...
     db.close()
 
 
+import backend.jobs.caching as jc
+import pytz
+from datetime import datetime
+from backend.database.schemas.job import Job
 def daily_pipeline():
+    logging.info("Starting daily pipeline")
     jobs = run_all_scrapers()
     add_to_db(jobs)
+
+    today = datetime.now(pytz.timezone('Europe/Helsinki'))
+    today_str = today.strftime("%Y-%m-%d")
+    
+    db = SessionLocal()
+    try:
+        today_jobs = db.query(Job.company_name, Job.job_title, Job.apply_url).filter(Job.added_on == today_str).distinct(Job.company_name, Job.job_title, Job.apply_url).all()
+        jc.job_cache = (today_str, today_jobs)
+    except:
+        ...
+    db.close()
 
 
 if __name__ == "__main__":
