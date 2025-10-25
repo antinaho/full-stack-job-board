@@ -67,3 +67,18 @@ def create_job(db: Session, job: models.JobCreate) -> Job:
     except Exception as e:
         logging.error(f"Job creation error: {str(e)}")
         raise JobCreationError(str(e))
+    
+
+def update_job(db: Session, job_id: int, job_update: models.JobCreate) -> Job:
+    job_data = job_update.model_dump(exclude_unset=True)
+    db.query(Job).filter(Job.id == job_id).update(job_data)
+    db.commit()
+    logging.info(f"Successfully updated job {job_id}")
+    return get_job_by_id(db, job_id)
+
+
+def delete_job(db: Session, job_id: int) -> None:
+    todo = get_job_by_id(db, job_id)
+    db.delete(todo)
+    db.commit()
+    logging.info(f"Job {job_id} deleted")

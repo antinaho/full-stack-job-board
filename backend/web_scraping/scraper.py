@@ -5,6 +5,11 @@ from bs4 import BeautifulSoup
 from backend.web_scraping.parser import parsers
 from backend.database.core import SessionLocal
 import logging
+import backend.jobs.caching as jc
+import pytz
+from datetime import datetime
+from backend.database.schemas.job import Job
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -70,10 +75,6 @@ def add_to_db(jobs):
     db.close()
 
 
-import backend.jobs.caching as jc
-import pytz
-from datetime import datetime
-from backend.database.schemas.job import Job
 def daily_pipeline():
     logging.info("Starting daily pipeline")
     jobs = run_all_scrapers()

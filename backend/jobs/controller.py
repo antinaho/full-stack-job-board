@@ -24,8 +24,22 @@ def get_job(db: DbSession, job_id: int):
 @router.post("/", response_model=models.JobResponse, status_code=status.HTTP_201_CREATED)
 def create_job(request: Request, db: DbSession, job: models.JobCreate):
     client_host = request.client.host
-    print("Hello?")
-    print(client_host)
     if client_host not in ("127.0.0.1", "::1"):
         raise HTTPException(status_code=403, detail="Local access only")
     return service.create_job(db, job)
+
+
+@router.put("/{job_id}", response_model=models.JobResponse)
+def update_job(request: Request, db: DbSession, job_id: int, job_update: models.JobCreate):
+    client_host = request.client.host
+    if client_host not in ("127.0.0.1", "::1"):
+        raise HTTPException(status_code=403, detail="Local access only")
+    return service.update_job(db, job_id, job_update)
+
+
+@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_job(request: Request, db: DbSession, job_id: int):
+    client_host = request.client.host
+    if client_host not in ("127.0.0.1", "::1"):
+        raise HTTPException(status_code=403, detail="Local access only")
+    return service.delete_job(db, job_id)
