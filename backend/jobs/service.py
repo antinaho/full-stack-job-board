@@ -29,6 +29,11 @@ def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
         logging.info(f"Retrieved {len(jobs)} unique jobs for date {queried_date}")
         return jobs
 
+    now_date = datetime.now().date()
+    if queried_date > now_date:
+        logging.warning("Trying to look up jobs in the future")
+        return []
+
     jobs = (
         db.query(Job.company_name, Job.job_title, Job.apply_url)
         .filter(Job.added_on == queried_date)
