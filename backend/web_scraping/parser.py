@@ -7,7 +7,6 @@ from backend.database.schemas.job import Job
 
 parsers = {}
 
-# Kesko
 def parse_kesko(company_name: str, raw_html: element.Tag) -> Job:
     
     try: #Job title
@@ -43,8 +42,8 @@ def parse_kesko(company_name: str, raw_html: element.Tag) -> Job:
         html = str(raw_html),
         apply_url = str(apply_url),
     )
-
 parsers["parse_kesko"] = parse_kesko
+
 
 def parse_supercell(company_name: str, raw_html: element.Tag) -> Job:
 
@@ -75,5 +74,4 @@ def parse_supercell(company_name: str, raw_html: element.Tag) -> Job:
         html = str(raw_html),
         apply_url = str(apply_url),
     )
-
 parsers["parse_supercell"] = parse_supercell

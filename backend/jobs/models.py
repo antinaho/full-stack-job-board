@@ -4,10 +4,12 @@ from typing import Optional
 class JobBase(BaseModel):
     pass
 
+
 class JobResponse(JobBase):
     company_name: str
     job_title: str
     apply_url: str
+
 
 class JobCreate(JobBase):
     job_title: str

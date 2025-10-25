@@ -3,7 +3,7 @@ from backend.database.schemas.job import Job
 import backend.jobs.models as models
 from datetime import datetime
 import pytz
-from backend.exceptions import JobNotFoundError, JobCreationError
+from backend.exceptions import JobNotFoundError, JobCreationError, JobDateNotParsableError
 from fastapi import HTTPException
 import logging
 import backend.jobs.caching as jc
@@ -21,7 +21,7 @@ def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
         queried_date = datetime.strptime(date_string, "%Y-%m-%d").date()
     except ValueError as e:
         logging.error(f"Tried passing invalid date string {date_string}. Error: {str(e)}")
-        raise HTTPException(status_code=404, detail=str(e))
+        raise JobDateNotParsableError(str(e))
     
     if str(queried_date) == str(jc.job_cache[0]):
         jobs = jc.job_cache[1]
@@ -52,6 +52,7 @@ def get_job_by_id(db: Session, job_id: int) -> Job:
         raise JobNotFoundError(job_id)
     logging.info(f"Retrieved job {job_id}")
     return job
+
 
 def create_job(db: Session, job: models.JobCreate) -> Job:
     try:

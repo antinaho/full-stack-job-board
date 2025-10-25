@@ -25,7 +25,7 @@ app = FastAPI(lifespan=lifespan)
 
 scheduler = BackgroundScheduler(timezone=pytz.UTC)
 trigger = CronTrigger(hour=0, minute=0, timezone=pytz.UTC)
-scheduler.add_job(daily_pipeline, trigger) #3am helsinki time
+scheduler.add_job(daily_pipeline, trigger)
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,20 +35,7 @@ app.add_middleware(
     allow_headers = ["*"],
 )
 
-
 Base.metadata.create_all(engine)
-
 
 register_routes(app)
 app.mount("/", StaticFiles(directory="static", html=True, check_dir=False), name="static")
-
-
-
-#TODO cache the results for a given day. lifespan at the start of the server
-# from datetime import datetime
-# import pytz
-#     today = datetime.now(pytz.timezone('Europe/Helsinki')).date()
-#     result = unique_jobs_from_date(today)
-#     global_cache['result'] = result
-#     yield
-#     global_cache['result'] = None

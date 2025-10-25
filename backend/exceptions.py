@@ -11,3 +11,7 @@ class JobNotFoundError(JobError):
 class JobCreationError(JobError):
     def __init__(self, error: str):
         super().__init__(status_code=500, detail=f"Failed to create job: {error}")
+
+class JobDateNotParsableError(JobError):
+    def __init__(self, error: str):
+        super().__init__(status_code=400, detail=f"Malformed query string: {error}")
