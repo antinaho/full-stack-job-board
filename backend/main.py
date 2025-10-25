@@ -7,6 +7,7 @@ from backend.database.core import Base, engine
 from backend.api import register_routes
 from backend.app_logging import setup_logging
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 import pytz
 
 from contextlib import asynccontextmanager
@@ -32,7 +33,8 @@ setup_logging()
 app = FastAPI(lifespan=lifespan)
 
 scheduler = BackgroundScheduler(timezone=pytz.UTC)
-scheduler.add_job(daily_pipeline, "cron", hour=0, minute=0) #3am helsinki time
+trigger = CronTrigger(hour=0, minute=0, timezone=pytz.UTC)
+scheduler.add_job(daily_pipeline, trigger) #3am helsinki time
 
 app.add_middleware(
     CORSMiddleware,
