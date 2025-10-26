@@ -23,8 +23,8 @@ setup_logging()
 
 app = FastAPI(lifespan=lifespan)
 
-scheduler = BackgroundScheduler(timezone=pytz.UTC)
-trigger = CronTrigger(hour=0, minute=0, timezone=pytz.UTC)
+scheduler = BackgroundScheduler(timezone=pytz.timezone("Europe/Helsinki"))
+trigger = CronTrigger(hour=1, minute=0, timezone=pytz.timezone("Europe/Helsinki"))
 scheduler.add_job(daily_pipeline, trigger)
 
 app.add_middleware(
@@ -38,4 +38,3 @@ app.add_middleware(
 Base.metadata.create_all(engine)
 
 register_routes(app)
-app.mount("/", StaticFiles(directory="static", html=True, check_dir=False), name="static")
