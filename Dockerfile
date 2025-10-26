@@ -8,14 +8,11 @@ RUN npm run build
 
 # BACKEND
 FROM python:3.13-slim
-WORKDIR /backend
+WORKDIR /app
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-COPY backend/ ./
-COPY --from=frontend /frontend/dist ./static
+COPY pyproject.toml uv.lock ./ 
+COPY backend/ ./backend
+COPY --from=frontend /frontend/dist ./backend/static
 RUN uv sync --frozen --no-cache
 
-
-CMD ["/backend/.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
-#CMD ["/backend/.venv/bin/fastapi", "run", "main.py", "--port", "80", "--host", "0.0.0.0"]
-#EXPOSE 8000
-#CMD ["python", "-m", "fastapi_cli", "run", "main.py"]
+CMD ["uv", "run", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

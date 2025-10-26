@@ -1,7 +1,8 @@
 [project]
-name = "backend"
+name = "job-board"
 version = "0.1.0"
-description = "Backend of the application"
+description = "Add your description here"
+readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "apscheduler>=3.11.0",
