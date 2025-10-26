@@ -9,6 +9,7 @@ Scrapes job postings from different websites and presents them in one place.
 Job Board allows users to quickly browse job listings aggregated from multiple sources in a single, easy-to-use interface. Service is updated with automated data pipeline every 24 hours.
 
 The backend exposes a full set of CRUD endpoints, allowing for:
+
 - Creating new job entries
 - Retrieving jobs (by id or date)
 - Updating existing job records
@@ -17,12 +18,12 @@ The backend exposes a full set of CRUD endpoints, allowing for:
 ---
 ### Tech Stack
 
-**Backend:** FastAPI
-**Frontend:** Astro + Svelte
-**Database:** SQLite with SQLAlchemy ORM
-**Web Scraping:** BeautifulSoup
-**Containerization:** Docker
-**Other:** git, uv
+**Backend:** FastAPI  
+**Frontend:** Astro + Svelte  
+**Database:** SQLite with SQLAlchemy ORM  
+**Web Scraping:** BeautifulSoup  
+**Containerization:** Docker  
+**Other:** git, uv  
 
 ---
 
