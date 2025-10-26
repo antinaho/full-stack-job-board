@@ -38,3 +38,4 @@ app.add_middleware(
 Base.metadata.create_all(engine)
 
 register_routes(app)
+app.mount("/", StaticFiles(directory="backend/static", html=True, check_dir=False), name="static")
