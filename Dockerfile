@@ -14,7 +14,8 @@ COPY backend/ ./
 COPY --from=frontend /frontend/dist ./static
 RUN uv sync --frozen --no-cache
 
-#EXPOSE 8000
 
-CMD ["/backend/.venv/bin/fastapi", "run", "main.py", "--port", "80", "--host", "0.0.0.0"]
+CMD ["/backend/.venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+#CMD ["/backend/.venv/bin/fastapi", "run", "main.py", "--port", "80", "--host", "0.0.0.0"]
+#EXPOSE 8000
 #CMD ["python", "-m", "fastapi_cli", "run", "main.py"]
