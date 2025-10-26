@@ -44,7 +44,7 @@ Have [Docker](https://www.docker.com/products/docker-desktop/) installed and run
 
         docker run -p 8080:8080 job-board-app
 
-4. Open your browser and go to: https://localhost:8080 to see the app
+4. Open your browser and go to: http://localhost:8080/ to see the app
 
 
 <br>
