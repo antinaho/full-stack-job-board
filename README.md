@@ -51,7 +51,7 @@ Have [Docker](https://www.docker.com/products/docker-desktop/) installed and run
 
 For local development have [uv](https://docs.astral.sh/uv/) and [node](https://nodejs.org/en/) installed.
 
-Run `uv run fastapi dev` inside backend folder to launch backend dev server
+Run `uv run fastapi dev` inside backend folder to launch backend dev server  
 Run `npm run dev` inside frontend folder to launch frontend dev server
 
 ---
