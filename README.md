@@ -20,7 +20,7 @@ The backend exposes a full set of CRUD endpoints, allowing for:
 
 **Backend:** FastAPI  
 **Frontend:** Astro + Svelte  
-**Database:** SQLite with SQLAlchemy ORM  
+**Database:** PostgreSQL with SQLAlchemy ORM  
 **Web Scraping:** BeautifulSoup  
 **Containerization:** Docker  
 **Other:** git, uv  
