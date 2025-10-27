@@ -23,7 +23,7 @@ def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
         logging.error(f"Tried passing invalid date string {date_string}. Error: {str(e)}")
         raise JobDateNotParsableError(str(e))
     
-    if str(queried_date) == str(jc.job_cache[0]):
+    if queried_date == jc.job_cache[0]:
         jobs = jc.job_cache[1]
         logging.info(f"Retrieving jobs from cache")
         logging.info(f"Retrieved {len(jobs)} unique jobs for date {queried_date}")

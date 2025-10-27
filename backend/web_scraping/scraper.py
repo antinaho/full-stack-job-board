@@ -83,13 +83,12 @@ def daily_pipeline():
     jobs = run_all_scrapers()
     add_to_db(jobs)
 
-    today = datetime.now(pytz.timezone('Europe/Helsinki'))
-    today_str = today.strftime("%Y-%m-%d")
+    today = datetime.now(pytz.timezone('Europe/Helsinki')).date()
     
     db = SessionLocal()
     try:
-        today_jobs = db.query(Job.company_name, Job.job_title, Job.apply_url).filter(Job.added_on == today_str).distinct(Job.company_name, Job.job_title, Job.apply_url).all()
-        jc.job_cache = (today_str, today_jobs)
+        today_jobs = db.query(Job.company_name, Job.job_title, Job.apply_url).filter(Job.added_on == today).distinct(Job.company_name, Job.job_title, Job.apply_url).all()
+        jc.job_cache = (today, today_jobs)
     except Exception as e:
         logging.error(f"Daily Pipeline: Failed to get jobs from database. Error: {str(e)}")
     db.close()
