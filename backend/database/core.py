@@ -2,9 +2,20 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 from fastapi import Depends
 from typing import Annotated
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = "sqlite+pysqlite:///database.db" 
-#DATABASE_URL = "sqlite+pysqlite:///:memory:" 
+load_dotenv()
+
+POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "mydatabase")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{POSTGRES_PORT}/{POSTGRES_DB}"
+)
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

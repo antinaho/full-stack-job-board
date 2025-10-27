@@ -36,22 +36,28 @@ Have [Docker](https://www.docker.com/products/docker-desktop/) installed and run
         git clone https://github.com/antinaho/full-stack-job-board.git  
         cd full-stack-job-board
 
-2. Build the Docker image:
+2. Setup default environment variables:
 
-        docker build -t job-board-app .
+        cp dev.env .env
 
-3. Run the container:
+3. Build the containers:
 
-        docker run -p 8080:8080 job-board-app
+        docker compose build
 
-4. Open your browser and go to: http://localhost:8080/ to see the app
+4. Start the containers:
+
+        docker compose up
+
+5. Open your browser and go to: http://localhost:8080/ to see the app
+
+6. Ctrl+C to stop, or in another terminal `docker compose down`
 
 
 <br>
 
 For local development have [uv](https://docs.astral.sh/uv/) and [node](https://nodejs.org/en/) installed.
 
-Run `uv run fastapi dev` inside backend folder to launch backend dev server  
+Run `docker compose up db` in root folder. Run `uv run fastapi dev` inside backend folder to launch backend dev server  
 Run `npm run dev` inside frontend folder to launch frontend dev server
 
 ---

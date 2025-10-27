@@ -388,3 +388,4 @@ frontend/.vscode/*
 .job-board-venv/
 backend/data/
 *.db
+.env

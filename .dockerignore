@@ -3,3 +3,4 @@ frontend/.vscode/
 frontend/.astro/
 frontend/dist/
 backend/.venv
+.env

@@ -12,6 +12,13 @@
         "url": "https://supercell.com/en/careers/?location=helsinki",
         "scraper_type" : "html",
         "single_job_selector" : "div.Grid_rowContainer__RAVMO > ul > li"
+    },
+
+    {
+        "name" : "Accenture",
+        "url":"https://www.accenture.com/fi-en/careers/jobsearch",
+        "scraper_type":"api"
+
     }
 
 
