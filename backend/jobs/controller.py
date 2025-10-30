@@ -13,15 +13,15 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[models.JobResponse])
-def get_jobs(db: DbSession, current_user: CurrentUser, date: str | None = None):
+def get_jobs(db: DbSession, date: str | None = None):
     if date:
-        return service.get_jobs_in_date(current_user, db, date)
-    return service.get_jobs(current_user, db)
+        return service.get_jobs_in_date(None, db, date)
+    return service.get_jobs(None, db)
 
 
 @router.get("/{job_id}", response_model=models.JobResponse)
-def get_job(db: DbSession, job_id: int, current_user: CurrentUser):
-    return service.get_job_by_id(current_user, db, job_id)
+def get_job(db: DbSession, job_id: int):
+    return service.get_job_by_id(None, db, job_id)
 
 
 @router.post("/", response_model=models.JobResponse, status_code=status.HTTP_201_CREATED)
