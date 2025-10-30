@@ -6,16 +6,18 @@ import logging
 from passlib.context import CryptContext
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Response, Cookie
 from backend.exceptions import AuthenticationError
 from datetime import timedelta, datetime, timezone
 import jwt
-from jwt import PyJWTError
+from jwt import PyJWTError, ExpiredSignatureError
 from backend.database.core import SessionLocal
 
 SECRET_KEY = '197b2c37c391bed93fe80344fe73b806947a65e36206e05a1a23c2fa12702fe3'
 ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+# 7 days
+REFRESH_TOKEN_EXPIRE_MINUTES = 24 * 60 * 7
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
@@ -72,7 +74,7 @@ def register_user(db: Session, register_user_request: models.RegisterUserRequest
         raise
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> models.TokenData:
+def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> models.TokenData:    
     return verify_token(token)
 
 CurrentUser = Annotated[models.TokenData, Depends(get_current_user)]
@@ -84,6 +86,9 @@ def verify_token(token: str) -> models.TokenData:
         user_role: str = payload.get("role")
         logging.info(f"PAYLOAD: {payload}")
         return models.TokenData(user_id=user_id, user_role=user_role)
+    except ExpiredSignatureError:
+        logging.warning("Access token expired")
+        raise AuthenticationError()
     except PyJWTError as e:
         logging.warning(f"Token verification failed: {str(e)}")
         raise AuthenticationError()
@@ -100,12 +105,54 @@ def require_role(required_role: str):
     return role_checker
 
 
-def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session) -> models.Token:
+def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session, response: Response) -> models.Token:
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise AuthenticationError()
-    token = create_access_token(user.email, user.id, user.role.value, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    return models.Token(access_token=token, token_type='bearer')
+    access_token = create_access_token(user.email, user.id, user.role.value, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    refresh_token = create_refresh_token(user.email, user.id, user.role.value, timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES))
+    
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        max_age=REFRESH_TOKEN_EXPIRE_MINUTES * 60 # 7 days
+    )
+    
+    return models.Token(access_token=access_token, token_type='bearer')
+
+
+def login_for_refresh_token(response: Response, refresh_token: str = Cookie(None)) -> models.Token:
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Missing refresh token")
+    
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("id")
+        role = payload.get("role")
+        email = payload.get("sub")
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Refresh token expired")
+    except PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    access_token = create_access_token(
+        email=email,
+        user_id=user_id,
+        role=role,
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    new_refresh_token = create_refresh_token(email, user_id, role, timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES))
+    
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=True,
+        max_age=REFRESH_TOKEN_EXPIRE_MINUTES * 60 # 7 days
+    )
+
+    return models.Token(access_token=access_token, token_type='bearer')
 
 
 def authenticate_user(email: str, password: str, db: Session) -> User | bool:
@@ -114,6 +161,16 @@ def authenticate_user(email: str, password: str, db: Session) -> User | bool:
         logging.warning(f"Failed authentication attempt for email: {email}")
         return False
     return user
+
+
+def create_refresh_token(email: str, user_id: UUID, role: str, expires_delta: timedelta) -> str:
+    encode = {
+        'sub': email,
+        'id': str(user_id),
+        'role': role,
+        'exp': datetime.now(timezone.utc) + expires_delta
+    }
+    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def create_access_token(email: str, user_id: UUID, role: str, expires_delta: timedelta) -> str:

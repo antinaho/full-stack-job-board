@@ -3,7 +3,6 @@ from backend.database.core import DbSession
 import backend.jobs.service as service
 import backend.jobs.models as models
 from typing import List
-from backend.auth.service import CurrentUser
 from backend.auth.service import require_role
 from backend.auth.models import TokenData
 
