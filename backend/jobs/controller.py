@@ -5,6 +5,7 @@ import backend.jobs.models as models
 from typing import List
 from backend.auth.service import CurrentUser
 from backend.auth.service import require_role
+from backend.auth.models import TokenData
 
 router = APIRouter(
     prefix="/jobs",
@@ -32,7 +33,7 @@ def create_job(db: DbSession, job: models.JobCreate, current_user: TokenData = D
 def update_job(db: DbSession, job_id: int, job_update: models.JobCreate, current_user: TokenData = Depends(require_role("admin"))):
     return service.update_job(current_user, db, job_id, job_update)
 
-from backend.auth.models import TokenData
+
 @router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_job(db: DbSession, job_id: int, current_user: TokenData = Depends(require_role("admin"))):
     return service.delete_job(current_user, db, job_id)
