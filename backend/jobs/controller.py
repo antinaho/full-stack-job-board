@@ -24,18 +24,12 @@ def get_job(db: DbSession, job_id: int, current_user: CurrentUser):
 
 
 @router.post("/", response_model=models.JobResponse, status_code=status.HTTP_201_CREATED)
-def create_job(request: Request, db: DbSession, job: models.JobCreate, current_user: CurrentUser):
-    client_host = request.client.host
-    if client_host not in ("127.0.0.1", "::1"):
-        raise HTTPException(status_code=403, detail="Local access only")
+def create_job(db: DbSession, job: models.JobCreate, current_user: TokenData = Depends(require_role("admin"))):
     return service.create_job(current_user, db, job)
 
 
 @router.put("/{job_id}", response_model=models.JobResponse)
-def update_job(request: Request, db: DbSession, job_id: int, job_update: models.JobCreate, current_user: CurrentUser):
-    client_host = request.client.host
-    if client_host not in ("127.0.0.1", "::1"):
-        raise HTTPException(status_code=403, detail="Local access only")
+def update_job(db: DbSession, job_id: int, job_update: models.JobCreate, current_user: TokenData = Depends(require_role("admin"))):
     return service.update_job(current_user, db, job_id, job_update)
 
 from backend.auth.models import TokenData
