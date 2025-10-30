@@ -4,19 +4,18 @@ import backend.jobs.models as models
 from datetime import datetime
 import pytz
 from backend.exceptions import JobNotFoundError, JobCreationError, JobDateNotParsableError
-from fastapi import HTTPException
 import logging
 import backend.jobs.caching as jc
+import backend.auth.models as auth_models
 
 
-def get_jobs(db: Session) -> list[models.JobResponse]:
+def get_jobs(current_user: auth_models.TokenData, db: Session) -> list[models.JobResponse]:
     jobs = db.query(Job).all()
-    logging.info(f"Retrieved {len(jobs)} jobs")
+    logging.info(f"Retrieved {len(jobs)} jobs for user {current_user.get_uuid()}")
     return jobs
 
 
-def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
-
+def get_jobs_in_date(current_user: auth_models.TokenData, db: Session, date_string: str) -> list[models.JobResponse]:
     try:
         queried_date = datetime.strptime(date_string, "%Y-%m-%d").date()
     except ValueError as e:
@@ -45,7 +44,7 @@ def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
     return jobs
 
 
-def get_job_by_id(db: Session, job_id: int) -> Job:
+def get_job_by_id(current_user: auth_models.TokenData, db: Session, job_id: int) -> Job:
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         logging.error(f"Job not found with id {job_id}")
@@ -54,7 +53,7 @@ def get_job_by_id(db: Session, job_id: int) -> Job:
     return job
 
 
-def create_job(db: Session, job: models.JobCreate) -> Job:
+def create_job(current_user: auth_models.TokenData, db: Session, job: models.JobCreate) -> Job:
     try:
         new_job = Job(**job.model_dump())
 
@@ -70,7 +69,7 @@ def create_job(db: Session, job: models.JobCreate) -> Job:
         raise JobCreationError(str(e))
     
 
-def update_job(db: Session, job_id: int, job_update: models.JobCreate) -> Job:
+def update_job(current_user: auth_models.TokenData, db: Session, job_id: int, job_update: models.JobCreate) -> Job:
     job_data = job_update.model_dump(exclude_unset=True)
     db.query(Job).filter(Job.id == job_id).update(job_data)
     db.commit()
@@ -78,8 +77,8 @@ def update_job(db: Session, job_id: int, job_update: models.JobCreate) -> Job:
     return get_job_by_id(db, job_id)
 
 
-def delete_job(db: Session, job_id: int) -> None:
-    todo = get_job_by_id(db, job_id)
+def delete_job(current_user: auth_models.TokenData, db: Session, job_id: int) -> None:
+    todo = get_job_by_id(current_user, db, job_id)
     db.delete(todo)
     db.commit()
     logging.info(f"Job {job_id} deleted")

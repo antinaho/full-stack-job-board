@@ -15,3 +15,8 @@ class JobCreationError(JobError):
 class JobDateNotParsableError(JobError):
     def __init__(self, error: str):
         super().__init__(status_code=400, detail=f"Malformed query string: {error}")
+
+
+class AuthenticationError(HTTPException):
+    def __init__(self, message: str = "Could not validate user"):
+        super().__init__(status_code=401, detail=message)

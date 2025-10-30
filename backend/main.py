@@ -3,17 +3,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from backend.database.schemas.job import Job
+from backend.database.schemas.user import User
 from backend.database.core import Base, engine
 from backend.api import register_routes
 from backend.app_logging import setup_logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import pytz
-
 from contextlib import asynccontextmanager
+from backend.auth.service import register_super_user
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    register_super_user()
     daily_pipeline()
     scheduler.start()
     yield

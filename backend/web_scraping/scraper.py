@@ -45,9 +45,6 @@ def scrape_html(site):
     return jobs
 
 
-    
-
-
 def run_all_scrapers():
     sites = load_config()
     all_jobs = []
