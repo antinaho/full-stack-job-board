@@ -1,12 +1,24 @@
 # Job Board 
 
-Scrapes job postings from different websites and presents them in one place.
+---
+
+### Tech Stack
+
+⚡ **FastAPI** – for backend API  
+🌌 **Astro** – frontend framework  
+🧩 **Svelte** – frontend components  
+🐘 **PostgreSQL** – database  
+🧠 **SQLAlchemy ORM** – ORM layer  
+🔐 **JWT Authentication** – secure auth  
+🐳 **Docker** – containerization  
+🧭 **git** – version control  
+🗂️ **uv** – Python package manager  
 
 ---
 
 ### Overview
 
-Job Board allows users to quickly browse job listings aggregated from multiple sources in a single, easy-to-use interface. Service is updated with automated data pipeline every 24 hours.
+Allows users to quickly browse job listings aggregated from multiple sources in a single, easy-to-use interface.
 
 The backend exposes a full set of CRUD endpoints, allowing for:
 
@@ -15,15 +27,7 @@ The backend exposes a full set of CRUD endpoints, allowing for:
 - Updating existing job records
 - Deleting jobs
 
----
-### Tech Stack
-
-**Backend:** FastAPI  
-**Frontend:** Astro + Svelte  
-**Database:** PostgreSQL with SQLAlchemy ORM  
-**Web Scraping:** BeautifulSoup  
-**Containerization:** Docker  
-**Other:** git, uv  
+Creating, updating and deleting endpoints are secured with JWT-based authentication and role-based access control.
 
 ---
 
