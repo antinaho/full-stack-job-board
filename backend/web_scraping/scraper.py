@@ -26,22 +26,23 @@ def scrape_html(site):
     soup = BeautifulSoup(response.text, "lxml")
 
     job_elements = soup.select(site["single_job_selector"])
-    
+
     normalized_name = site["name"].lower().replace(" ", "_")
     func_name = f"parse_{normalized_name}"
     parser_func = parsers.get(func_name)
-    
+
     if not parser_func or not callable(parser_func):
-        raise ValueError(f"No parser function found for site: {site["name"]}, expected function: {func_name}")
+        raise ValueError(
+            f"No parser function found for site: {site['name']}, expected function: {func_name}"
+        )
 
     jobs = []
     for job_element in job_elements:
-        
         job = parser_func(site["name"], job_element)
-        if job == None:
+        if job is None:
             continue
         jobs.append(job)
-    
+
     return jobs
 
 
@@ -49,9 +50,8 @@ def run_all_scrapers():
     sites = load_config()
     all_jobs = []
     for site in sites:
-
         scraper_type = site["scraper_type"]
-        
+
         if scraper_type == "html":
             jobs = scrape_html(site)
         elif scraper_type == "api":
@@ -63,7 +63,6 @@ def run_all_scrapers():
 
 
 def add_to_db(jobs):
-
     db = SessionLocal()
     for job in jobs:
         try:
@@ -71,7 +70,9 @@ def add_to_db(jobs):
             db.commit()
             db.refresh(job)
         except Exception as e:
-            logging.error(f"Daily Pipeline: Failed to add job to database. Error: {str(e)}")
+            logging.error(
+                f"Daily Pipeline: Failed to add job to database. Error: {str(e)}"
+            )
     db.close()
 
 
@@ -80,14 +81,21 @@ def daily_pipeline():
     jobs = run_all_scrapers()
     add_to_db(jobs)
 
-    today = datetime.now(pytz.timezone('Europe/Helsinki')).date()
-    
+    today = datetime.now(pytz.timezone("Europe/Helsinki")).date()
+
     db = SessionLocal()
     try:
-        today_jobs = db.query(Job.company_name, Job.job_title, Job.apply_url).filter(Job.added_on == today).distinct(Job.company_name, Job.job_title, Job.apply_url).all()
+        today_jobs = (
+            db.query(Job.company_name, Job.job_title, Job.apply_url)
+            .filter(Job.added_on == today)
+            .distinct(Job.company_name, Job.job_title, Job.apply_url)
+            .all()
+        )
         jc.job_cache = (today, today_jobs)
     except Exception as e:
-        logging.error(f"Daily Pipeline: Failed to get jobs from database. Error: {str(e)}")
+        logging.error(
+            f"Daily Pipeline: Failed to get jobs from database. Error: {str(e)}"
+        )
     db.close()
 
 
