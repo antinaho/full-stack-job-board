@@ -4,12 +4,14 @@ from sqlalchemy import Column, String, Enum
 import uuid
 import enum
 
+
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
     USER = "user"
 
+
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True, nullable=False)
