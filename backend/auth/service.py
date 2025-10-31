@@ -89,7 +89,7 @@ def register_user(
 def verify_token(token: str) -> models.TokenData:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("id")
+        user_id: str = payload.get("sub")
         user_role: str = payload.get("role")
         logging.info(f"PAYLOAD: {payload}")
         return models.TokenData(user_id=user_id, user_role=user_role)
@@ -101,7 +101,7 @@ def verify_token(token: str) -> models.TokenData:
         raise AuthenticationError()
 
 
-def login_for_access_token(
+def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session,
     response: Response,
@@ -110,13 +110,11 @@ def login_for_access_token(
     if not user:
         raise AuthenticationError()
     access_token = create_access_token(
-        user.email,
         user.id,
         user.role.value,
         timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     refresh_token = create_refresh_token(
-        user.email,
         user.id,
         user.role.value,
         timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES),
@@ -132,31 +130,27 @@ def login_for_access_token(
     return models.Token(access_token=access_token, token_type="bearer")
 
 
-def login_for_refresh_token(
-    response: Response, refresh_token: str = Cookie(None)
-) -> models.Token:
+def refresh(response: Response, refresh_token: str = Cookie(None)) -> models.Token:
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Missing refresh token")
 
     try:
         payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("id")
+        user_id = payload.get("sub")
         role = payload.get("role")
-        email = payload.get("sub")
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Refresh token expired")
     except PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     access_token = create_access_token(
-        email=email,
         user_id=user_id,
         role=role,
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
     new_refresh_token = create_refresh_token(
-        email, user_id, role, timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+        user_id, role, timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
     )
 
     response.set_cookie(
@@ -177,24 +171,18 @@ def authenticate_user(email: str, password: str, db: Session) -> User | bool:
     return user
 
 
-def create_refresh_token(
-    email: str, user_id: UUID, role: str, expires_delta: timedelta
-) -> str:
+def create_refresh_token(user_id: UUID, role: str, expires_delta: timedelta) -> str:
     encode = {
-        "sub": email,
-        "id": str(user_id),
+        "sub": str(user_id),
         "role": role,
         "exp": datetime.now(timezone.utc) + expires_delta,
     }
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def create_access_token(
-    email: str, user_id: UUID, role: str, expires_delta: timedelta
-) -> str:
+def create_access_token(user_id: UUID, role: str, expires_delta: timedelta) -> str:
     encode = {
-        "sub": email,
-        "id": str(user_id),
+        "sub": str(user_id),
         "role": role,
         "exp": datetime.now(timezone.utc) + expires_delta,
     }

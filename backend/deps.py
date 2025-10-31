@@ -18,7 +18,7 @@ def get_db():
 
 DbSessionDep = Annotated[Session, Depends(get_db)]
 
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 def get_current_user(
