@@ -12,8 +12,15 @@ from datetime import timedelta, datetime, timezone
 import jwt
 from jwt import PyJWTError, ExpiredSignatureError
 from backend.database.core import SessionLocal
+from dotenv import load_dotenv
+import os
 
-SECRET_KEY = "197b2c37c391bed93fe80344fe73b806947a65e36206e05a1a23c2fa12702fe3"
+load_dotenv()
+
+SECRET_KEY = os.getenv(
+    "AUTH_JWT_SECRET",
+    "197b2c37c391bed93fe80344fe73b806947a65e36206e05a1a23c2fa12702fe3",
+)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 # 7 days
@@ -37,13 +44,16 @@ def register_super_user() -> None:
         db.close()
         return
 
+    super_email = os.getenv("SUPERUSER_EMAIL", "admin@admin.com")
+    super_password = os.getenv("SUPERUSER_PASSWORD", "admin")
+
     try:
         super_user = User(
             id=uuid4(),
-            email="test@admin.com",
-            first_name="Markus",
+            email=super_email,
+            first_name="Admin",
             last_name="Admin",
-            password_hash=get_password_hash("password123"),
+            password_hash=get_password_hash(super_password),
             role=UserRole.ADMIN,
         )
         db.add(super_user)
