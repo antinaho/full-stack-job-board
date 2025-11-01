@@ -16,7 +16,10 @@ date_pattern = "^(?:19|20)\d\d-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$"
 
 @router.get("/", response_model=List[models.JobResponse])
 def get_jobs(
-    db: DbSessionDep, date: Annotated[str | None, Query(pattern=date_pattern)] = None
+    db: DbSessionDep,
+    date: Annotated[str | None, Query(pattern=date_pattern)] = None,
+    skip: Annotated[int | None, Query(ge=0)] = 0,
+    limit: Annotated[int | None, Query(ge=100)] = 100,
 ):
     if date:
         return service.get_jobs_in_date(db, date)
@@ -24,7 +27,7 @@ def get_jobs(
 
 
 @router.get("/{job_id}", response_model=models.JobResponse)
-def get_job(db: DbSessionDep, job_id: int):
+def get_job(db: DbSessionDep, job_id: Annotated[int, Query(ge=0)]):
     return service.get_job_by_id(db, job_id)
 
 
