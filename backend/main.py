@@ -14,6 +14,12 @@ from backend.auth.service import register_super_user
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from backend.database.schemas.user import User  # noqa: F401
+    from backend.database.schemas.job import Job  # noqa: F401
+    from backend.database.schemas.password_reset import PasswordReset  # noqa: F401
+
+    Base.metadata.create_all(engine)
+
     register_super_user()
     daily_pipeline()
     scheduler.start()
@@ -37,7 +43,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-Base.metadata.create_all(engine)
 
 register_routes(app)
 app.mount(

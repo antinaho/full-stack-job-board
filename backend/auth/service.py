@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import update
 import backend.auth.models as models
 from backend.database.schemas.user import User, UserRole
+from backend.database.schemas.password_reset import PasswordReset
 from uuid import UUID, uuid4
 import logging
 from passlib.context import CryptContext
@@ -163,11 +165,11 @@ def refresh(response: Response, refresh_token: str = Cookie(None)) -> models.Tok
     return models.Token(access_token=access_token, token_type="bearer")
 
 
-def authenticate_user(email: str, password: str, db: Session) -> User | bool:
+def authenticate_user(email: str, password: str, db: Session) -> User | None:
     user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(password, user.password_hash):
         logging.warning(f"Failed authentication attempt for email: {email}")
-        return False
+        return None
     return user
 
 
@@ -187,3 +189,86 @@ def create_access_token(user_id: UUID, role: str, expires_delta: timedelta) -> s
         "exp": datetime.now(timezone.utc) + expires_delta,
     }
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+# TODO Generate proper code uuid?
+def password_reset_token():
+    return 123
+
+
+from sqlalchemy.dialects.postgresql import insert
+
+
+def send_password_reset_email(email: str, db: Session):
+    user = db.query(User).filter(User.email == email).first()
+    if user is None:
+        return AuthenticationError()
+
+    stmt = insert(PasswordReset).values(
+        user_id=user.id,
+        reset_token=password_reset_token(),
+        expirary_time=datetime.now(timezone.utc) + timedelta(hours=1),
+    )
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["user_id"],
+        set_={
+            "reset_token": password_reset_token(),
+            "expirary_time": datetime.now(timezone.utc) + timedelta(hours=1),
+        },
+    )
+    db.execute(stmt)
+    db.commit()
+
+    # TODO send email
+
+
+def verify_reset_code(reset_token: str, db: Session):
+    reset_req = (
+        db.query(PasswordReset).filter(PasswordReset.reset_token == reset_token).first()
+    )
+
+    if reset_req is None:
+        # TODO reset doesnt exist
+        raise AuthenticationError()
+
+    tz_expirary_time = reset_req.expirary_time.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > tz_expirary_time:
+        # TODO reset timed out
+        raise AuthenticationError
+    else:
+        return True
+
+
+def reset_password(reset_token: str, new_password: str, db: Session):
+    reset_req = (
+        db.query(PasswordReset).filter(PasswordReset.reset_token == reset_token).first()
+    )
+    if reset_req is None:
+        # TODO reset doesnt exist
+        raise AuthenticationError()
+
+    tz_expirary_time = reset_req.expirary_time.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > tz_expirary_time:
+        # TODO reset timed out
+        raise AuthenticationError
+
+    user = db.query(User).filter(User.id == reset_req.user_id).first()
+    if user is None:
+        # user not in db?
+        raise AuthenticationError
+
+    new_password_hashed = get_password_hash(new_password)
+
+    stmt = (
+        update(User).where(User.id == user.id).values(password_hash=new_password_hashed)
+    )
+    db.execute(stmt)
+
+    r_stmt = (
+        update(PasswordReset)
+        .where(PasswordReset.reset_token == reset_token)
+        .values(expirary_time=datetime.now(timezone.utc))
+    )
+    db.execute(r_stmt)
+
+    db.commit()

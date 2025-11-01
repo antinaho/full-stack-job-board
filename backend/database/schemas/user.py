@@ -1,6 +1,7 @@
 from backend.database.core import Base
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Column, String, Enum
+from sqlalchemy.orm import relationship
 import uuid
 import enum
 
@@ -19,6 +20,8 @@ class User(Base):
     last_name = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
     role = Column(Enum(UserRole), default=UserRole.USER)
+
+    password_reset_req = relationship("PasswordReset", back_populates="user")
 
     def __repr__(self):
         return f"<User(email='{self.email}', first_name='{self.first_name}', last_name='{self.last_name}')>"
