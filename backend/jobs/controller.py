@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Query
+from fastapi import APIRouter, status, Query, Path
 import backend.jobs.service as service
 import backend.jobs.models as models
 from typing import List
@@ -27,7 +27,7 @@ def get_jobs(
 
 
 @router.get("/{job_id}", response_model=models.JobResponse)
-def get_job(db: DbSessionDep, job_id: Annotated[int, Query(ge=0)]):
+def get_job(db: DbSessionDep, job_id: int = Path(..., ge=0)):
     return service.get_job_by_id(db, job_id)
 
 
