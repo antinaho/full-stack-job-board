@@ -22,3 +22,7 @@ class TokenData(BaseModel):
         if self.user_id:
             return UUID(self.user_id)
         return None
+
+
+class GenericMessage(BaseModel):
+    msg: str
