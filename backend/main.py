@@ -14,6 +14,7 @@ from backend.auth.service import register_super_user
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Import db schemas so they are binded to the Base.metadata
     from backend.database.schemas.user import User  # noqa: F401
     from backend.database.schemas.job import Job  # noqa: F401
     from backend.database.schemas.password_reset import PasswordReset  # noqa: F401
