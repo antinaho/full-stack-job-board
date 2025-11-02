@@ -43,7 +43,7 @@ def update_job(
     job_id: Annotated[int, Path(..., ge=0)],
     job_update: models.JobCreate,
     current_admin: CurrentAdminUser,
-):
+) -> models.JobResponse:
     return service.update_job(current_admin, db, job_id, job_update)
 
 
