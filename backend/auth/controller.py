@@ -62,19 +62,19 @@ def reset_password(
     return models.GenericMessage(msg="Password reset")
 
 
-@router.post("/change-password")  # For logged in users
-def change_password(str: Annotated[str, Query()]):
-    pass
+# @router.post("/change-password")  # For logged in users
+# def change_password(str: Annotated[str, Query()]):
+#     pass
 
 
-@router.post("/verify-email")
-def verify_email():
-    pass
+# @router.post("/verify-email")
+# def verify_email():
+#     pass
 
 
-@router.post("/resend-code")
-def resend_code():
-    pass
+# @router.post("/resend-code")
+# def resend_code():
+#     pass
 
 
 @router.post("/verify-reset-code")  # For frontend rendering
@@ -88,20 +88,20 @@ def verify_reset_code(
 # 👤 User Account Management
 
 
-# Get the currently authenticated user’s profile (based on the access token).
-@router.get("/me")
-def get_me():
-    pass
+# # Get the currently authenticated user’s profile (based on the access token).
+# @router.get("/me")
+# def get_me():
+#     pass
 
 
-@router.patch("/me")  # Update user profile information (name, email, etc.).
-def change_me():
-    pass
+# @router.patch("/me")  # Update user profile information (name, email, etc.).
+# def change_me():
+#     pass
 
 
-@router.delete("/me")  # Delete the user’s own account.
-def delete_me():
-    pass
+# @router.delete("/me")  # Delete the user’s own account.
+# def delete_me():
+#     pass
 
 
 # ⚙️ ADMIN ENDPOINTS
