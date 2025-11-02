@@ -48,7 +48,7 @@ def update_job(
 
 
 @router.delete(
-    "/{job_id}", response_model=models.JobDelete, status_code=status.HTTP_204_NO_CONTENT
+    "/{job_id}", response_model=models.JobDelete, status_code=status.HTTP_200_OK
 )
 def delete_job(
     db: DbSessionDep,
