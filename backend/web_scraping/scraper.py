@@ -5,10 +5,6 @@ from bs4 import BeautifulSoup
 from backend.web_scraping.parser import parsers
 from backend.database.core import SessionLocal
 import logging
-import backend.jobs.caching as jc
-import pytz
-from datetime import datetime
-from backend.database.schemas.job import Job
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -80,23 +76,6 @@ def daily_pipeline():
     logging.info("Starting daily pipeline")
     jobs = run_all_scrapers()
     add_to_db(jobs)
-
-    today = datetime.now(pytz.timezone("Europe/Helsinki")).date()
-
-    db = SessionLocal()
-    try:
-        today_jobs = (
-            db.query(Job.company_name, Job.job_title, Job.apply_url)
-            .filter(Job.added_on == today)
-            .distinct(Job.company_name, Job.job_title, Job.apply_url)
-            .all()
-        )
-        jc.job_cache = (today, today_jobs)
-    except Exception as e:
-        logging.error(
-            f"Daily Pipeline: Failed to get jobs from database. Error: {str(e)}"
-        )
-    db.close()
 
 
 if __name__ == "__main__":
