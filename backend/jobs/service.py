@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import select, update
 from backend.database.schemas.job import Job
 import backend.jobs.models as models
 from datetime import datetime
@@ -9,70 +10,57 @@ from backend.exceptions import (
     JobDateNotParsableError,
 )
 import logging
-import backend.jobs.caching as jc
 import backend.auth.models as auth_models
 
 
-def get_jobs(db: Session) -> list[models.JobResponse]:
-    jobs = db.query(Job).all()
-    logging.info(f"Retrieved {len(jobs)} jobs.")
-    return jobs
+def get_jobs(
+    db: Session, date_string: str | None, skip: int, limit: int
+) -> list[models.JobResponse]:
+    stmt = select(Job).distinct(Job.company_name, Job.job_title, Job.apply_url)
+
+    if date_string is not None:
+        # date_string should be in valid format from previous url validation before this function was called, no need to try/except
+        date = datetime.strptime(date_string, "%Y-%m-%d").date()
+        stmt = stmt.where(Job.added_on == date)
+
+    stmt = stmt.offset(skip).limit(limit)
+
+    result = db.execute(stmt)
+    jobs = result.scalars().all()
+
+    jobs_response = [models.JobResponse.model_validate(job) for job in jobs]
+
+    logging.info(f"Retrieved {len(jobs_response)} jobs.")
+
+    return jobs_response
 
 
-def get_jobs_in_date(db: Session, date_string: str) -> list[models.JobResponse]:
-    try:
-        queried_date = datetime.strptime(date_string, "%Y-%m-%d").date()
-    except ValueError as e:
-        logging.error(
-            f"Tried passing invalid date string {date_string}. Error: {str(e)}"
-        )
-        raise JobDateNotParsableError(str(e))
-
-    if queried_date == jc.job_cache[0]:
-        jobs = jc.job_cache[1]
-        logging.info(
-            f"Retrieved {len(jobs)} unique jobs for date {queried_date} from cache"
-        )
-        return jobs
-
-    now_date = datetime.now().date()
-    if queried_date > now_date:
-        logging.warning("Trying to look up jobs in the future")
-        return []
-
-    jobs = (
-        db.query(Job.company_name, Job.job_title, Job.apply_url)
-        .filter(Job.added_on == queried_date)
-        .distinct(Job.company_name, Job.job_title, Job.apply_url)
-        .all()
-    )
-
-    logging.info(f"Retrieved {len(jobs)} unique jobs for date {queried_date}")
-    return jobs
-
-
-def get_job_by_id(db: Session, job_id: int) -> Job:
-    job = db.query(Job).filter(Job.id == job_id).first()
-    if not job:
+def get_job_by_id(db: Session, job_id: int) -> models.JobResponse:
+    stmt = select(Job).where(Job.id == job_id)
+    job = db.execute(stmt).scalar()
+    if job is None:
         logging.error(f"Job not found with id {job_id}")
         raise JobNotFoundError(job_id)
+
     logging.info(f"Retrieved job {job_id}")
-    return job
+
+    return models.JobResponse.model_validate(job)
 
 
 def create_job(
     current_user: auth_models.TokenData, db: Session, job: models.JobCreate
-) -> Job:
+) -> models.JobResponse:
     try:
-        new_job = Job(**job.model_dump())
+        new_job: Job = Job(**job.model_dump())
 
-        new_job.added_on = datetime.now(pytz.timezone("Europe/Helsinki")).date()
+        new_job.added_on = datetime.now(pytz.timezone("Europe/Helsinki")).date()  # type: ignore
 
         db.add(new_job)
         db.commit()
         db.refresh(new_job)
-        logging.info("New job created")
-        return new_job
+
+        logging.info(f"New job created by {current_user.user_id}")
+        return models.JobResponse.model_validate(new_job)
     except Exception as e:
         logging.error(f"Job creation error: {str(e)}")
         raise JobCreationError(str(e))
@@ -83,16 +71,35 @@ def update_job(
     db: Session,
     job_id: int,
     job_update: models.JobCreate,
-) -> Job:
+) -> models.JobResponse:
     job_data = job_update.model_dump(exclude_unset=True)
-    db.query(Job).filter(Job.id == job_id).update(job_data)
+
+    stmt = (
+        update(Job)
+        .where(Job.id == job_id)
+        .values(**job_data)
+        .execution_options(synchronize_session="fetch")
+    )
+
+    db.execute(stmt)
     db.commit()
-    logging.info(f"Successfully updated job {job_id}")
+
+    logging.info(f"Successfully updated job {job_id}. By {current_user.user_id}")
     return get_job_by_id(db, job_id)
 
 
-def delete_job(db: Session, job_id: int) -> None:
-    job = get_job_by_id(db, job_id)
+def delete_job(
+    db: Session, current_admin: auth_models.TokenData, job_id: int
+) -> models.JobDelete:
+    result = db.execute(select(Job).where(Job.id == job_id))
+    job = result.scalar_one_or_none()
+
+    if job is None:
+        logging.error(f"Job not found with id {job_id}")
+        raise JobNotFoundError(job_id)
+
     db.delete(job)
     db.commit()
+
     logging.info(f"Job {job_id} deleted")
+    return models.JobDelete(id=job_id)
