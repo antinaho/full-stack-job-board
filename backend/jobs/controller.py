@@ -18,7 +18,7 @@ def get_jobs(
     db: DbSessionDep,
     date: Annotated[str | None, Query(pattern=date_pattern)] = None,
     offset: Annotated[int, Query(ge=0)] = 0,
-    limit: Annotated[int, Query(ge=20)] = 20,
+    limit: Annotated[int, Query(ge=0, le=100)] = 20,
 ) -> list[models.JobResponse]:
     return service.get_jobs(db, date, offset, limit)
 
