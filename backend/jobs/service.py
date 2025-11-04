@@ -35,6 +35,22 @@ def get_jobs(
     return jobs_response
 
 
+def get_total_jobs(db: Session, date_string: str | None) -> models.JobCount:
+    stmt = select(Job).distinct(Job.company_name, Job.job_title, Job.apply_url)
+
+    if date_string is not None:
+        # date_string should be in valid format from previous url validation before this function was called, no need to try/except
+        date = datetime.strptime(date_string, "%Y-%m-%d").date()
+        stmt = stmt.where(Job.added_on == date)
+
+    result = db.execute(stmt)
+    jobs = result.scalars().all()
+
+    logging.info("Retrieved job count.")
+
+    return models.JobCount(count=len(jobs))
+
+
 def get_job_by_id(db: Session, job_id: int) -> models.JobResponse:
     stmt = select(Job).where(Job.id == job_id)
     job = db.execute(stmt).scalar()

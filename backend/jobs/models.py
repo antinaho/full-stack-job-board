@@ -18,6 +18,10 @@ class JobCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class JobCount(BaseModel):
+    count: int
+
+
 class JobDelete(BaseModel):
     id: int
     message: str = "Job deleted successfully"
