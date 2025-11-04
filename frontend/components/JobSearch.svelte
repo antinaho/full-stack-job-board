@@ -7,7 +7,7 @@
     let error = null;
     let totalJobs = 0;
     let page = 0;
-    let limit = 20;
+    let limit = 10;
     let hasPrev = false;
     let hasNext = false;
     let jobsCount = 0;
@@ -80,6 +80,12 @@
 {:else}
     <h1>{jobsCount} active job posts</h1>
 
+    <div class="pagination">
+        <button disabled={!hasPrev} on:click={goToPrev}>Previous</button>
+        <span>Page {page + 1} of {Math.ceil(totalJobs / limit)}</span>
+        <button disabled={!hasNext} on:click={goToNext}>Next</button>
+    </div>
+
     <div class="search-container">
         <!-- Search input commented out for now
         <input
@@ -106,45 +112,82 @@
             {/if}
         </div>
     </div>
-
-    <div class="pagination">
-        <button disabled={!hasPrev} on:click={goToPrev}>Previous</button>
-        <span>Page {page + 1} of {Math.ceil(totalJobs / limit)}</span>
-        <button disabled={!hasNext} on:click={goToNext}>Next</button>
-    </div>
 {/if}
 
 <style>
-  .search-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin: 1.5rem 0;
+        padding: 1rem;
+    }
 
-  .search-input {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: #1a1a1a;
-    color: #fff;
-    outline: none;
-    transition: all 0.2s ease;
-  }
+    .pagination button {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: #1e1e1e;
+        color: #e6f0ff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
 
-  .search-input:focus {
-    border-color: rgba(0, 150, 255, 0.5);
-    box-shadow: 0 0 10px rgba(0, 150, 255, 0.3);
-  }
+    .pagination button:hover:not(:disabled) {
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 150, 255, 0.3);
+        transform: translateY(-2px);
+        color: #79c0ff;
+    }
 
-  .job-list {
-    display: grid;
-    gap: 1rem;
-  }
+    .pagination button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background-color: #1a1a1a;
+    }
 
-  .no-results {
-    color: #888;
-    font-size: 0.95rem;
-    text-align: center;
-  }
+    .pagination span {
+        color: #b0b0b0;
+        font-size: 0.95rem;
+        font-weight: 500;
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .search-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .search-input {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: #1a1a1a;
+        color: #fff;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+        border-color: rgba(0, 150, 255, 0.5);
+        box-shadow: 0 0 10px rgba(0, 150, 255, 0.3);
+    }
+
+    .job-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .no-results {
+        color: #888;
+        font-size: 0.95rem;
+        text-align: center;
+    }
 </style>
