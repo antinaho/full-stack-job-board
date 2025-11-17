@@ -75,24 +75,3 @@ Run tests with:
 
         uv run pytest
 
----
-
-### CI/CD
-
-The project uses GitHub Actions for continuous integration and deployment.
-
-**Automated Workflows:**
-
-- **Tests**: Automatically runs pytest on every push and pull request to `main` and `develop` branches
-- **Linting**: Checks code quality with ruff and type checking with mypy (optional)
-- **PostgreSQL Service**: Spins up a PostgreSQL database for integration tests
-
-**Workflow File**: `.github/workflows/ci.yml`
-
-The CI pipeline ensures code quality by:
-1. Setting up Python 3.12 environment
-2. Installing dependencies with uv
-3. Running the full test suite against a PostgreSQL database
-4. Performing code quality checks
-
-View the status of your builds in the "Actions" tab of your GitHub repository.
