@@ -9,6 +9,7 @@ from passlib.context import CryptContext
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Depends, HTTPException, Response, Cookie
+from sqlalchemy.dialects.postgresql import insert
 from backend.exceptions import AuthenticationError
 from datetime import timedelta, datetime, timezone
 import jwt
@@ -194,9 +195,6 @@ def create_access_token(user_id: UUID, role: str, expires_delta: timedelta) -> s
 # TODO Generate proper code uuid?
 def password_reset_token():
     return 123
-
-
-from sqlalchemy.dialects.postgresql import insert
 
 
 def send_password_reset_email(email: str, db: Session):

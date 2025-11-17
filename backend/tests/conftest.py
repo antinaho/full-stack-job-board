@@ -13,7 +13,11 @@ def db_session():
         SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
     )
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    
+
+    from backend.database.schemas.user import User
+    from backend.database.schemas.password_reset import PasswordReset
+    from backend.database.schemas.job import Job
+
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     try:
@@ -26,10 +30,10 @@ def db_session():
 @pytest.fixture(scope="function")
 def test_job():
     return Job(
-        id = 100,
-        company_name = "Antinaho",
-        job_title = "Chiller",
-        added_on = datetime.strptime("2001-01-01", "%Y-%m-%d").date(),
-        html = "<h1>Hello</h1>",
-        apply_url = "https://antinaho.com/apply"
+        id=100,
+        company_name="Antinaho",
+        job_title="Worker",
+        added_on=datetime.strptime("2001-01-01", "%Y-%m-%d").date(),
+        html="<h1>Hello</h1>",
+        apply_url="https://antinaho.com/apply",
     )

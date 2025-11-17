@@ -19,9 +19,11 @@ def get_jobs(
     stmt = select(Job).distinct(Job.company_name, Job.job_title, Job.apply_url)
 
     if date_string is not None:
-        # date_string should be in valid format from previous url validation before this function was called, no need to try/except
-        date = datetime.strptime(date_string, "%Y-%m-%d").date()
-        stmt = stmt.where(Job.added_on == date)
+        try:
+            date = datetime.strptime(date_string, "%Y-%m-%d").date()
+            stmt = stmt.where(Job.added_on == date)
+        except ValueError as ve:
+            raise JobDateNotParsableError(str(ve))
 
     stmt = stmt.offset(skip).limit(limit)
 
